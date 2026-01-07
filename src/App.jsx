@@ -1,35 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Navbar from "../components/shared/Navbar"
+import "./index.css"
+import SplitTextHeader from "../components/SplitText"
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="text-white relative min-h-screen bg-red-500 from-purple-600 to-blue-600">
+      <Navbar />
+      <div className="w-90.25">
+        <SplitTextHeader />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div className="p-8">
+        
+        {/* Add more content that will show through the glass */}
+        <div className="">
+          <p className="font-inter">Testing inter</p>
+          <p className="font-neue">Testing haaas</p>
+        </div>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <div className="w-full min-h-screen bg-yellow-300" />
+      <div className="w-full min-h-screen bg-blue-300" />
+      <div className="w-full min-h-screen bg-green-300" />
+      <div className="w-full min-h-screen bg-cyan-300" />
+    </div>
   )
 }
-
-export default App
