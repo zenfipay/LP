@@ -152,5 +152,8 @@
 
 body {
   font-size: 15px;
+  background-color: #101010;
+  font-family: "inter", sans-serif;
+  position: relative;
 }
 
