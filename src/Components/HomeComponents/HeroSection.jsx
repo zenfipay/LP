@@ -1,8 +1,9 @@
-import SplitTextHeader from "../SplitText";
+import SplitText from "../ui/SplitTextHeader";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
-import HeroGradient from "../HeroGradient";
-import RequestDemo from "../CalendlyMorphBtn";
+import HeroGradient from "../ui/HeroGradient";
+import RequestDemo from "../ui/CalendlyMorphBtn";
+import SplitParagraph from "../ui/SplitTextParagraph";
 
 export default function HeroSection() {
 
@@ -18,16 +19,15 @@ export default function HeroSection() {
                 <div className="relative z-10 top-10 space-y-11">
 
                     {/* TEXT */}
-                    <div className="space-y-5">
-                        <SplitTextHeader />
-                        <motion.p
-                            initial={{ opacity:0, x:-20 }}
-                            animate={{ opacity:1, x:0 }}
-                            transition={{ duration:1, ease:"easeIn", delay:0.3 }}
-                            className="font-inter text-[#B0B7C7] text-[13px] lg:text-[15px] leading-[100%] tracking-[0.5]"
-                        >
-                            Bringing stablecoin payment into everyday purchases. Accept, send, & settle stablecoin payments instantly
-                        </motion.p>
+                    <div className=" space-y-5">
+                        <SplitText 
+                            className="w-[361px] lg:w-178 lg:h-[300px] text-white font-neue font-medium text-[48px] lg:text-[110px] leading-11.25 lg:leading-25"
+                            text="Stablecoin payments made simple."
+                        />
+                        <SplitParagraph
+                            className="lg:w-123.5 font-inter text-[13px] text-[#B0B7C7] leading-[100%] tracking-[0.5px]"
+                            text="Bringing stablecoin payment into everyday purchases. Accept, send, & settle stablecoin payments instantly"
+                        />
                     </div>
 
                     {/* BUTTONS */}
@@ -49,16 +49,8 @@ export default function HeroSection() {
 
                 {/* RIGHT SIDE */}
                 <div className="relative ">
-
-                    <motion.img 
-                        initial={{ opacity:0, y:-200 }}
-                        animate={{ opacity:1, y:0 }}
-                        transition={{ duration:1, ease:"easeIn" }}
-                        src="/icons/zcoin.svg" 
-                        alt=" zenfipay coin icon" 
-                        className="hidden lg:block absolute top-10 w-24 transition animate-bounce " 
-                        
-                    />
+                
+                    <img src="/icons/zcoin.svg" alt="zenfipay coin icon" className="hidden lg:block absolute top-15" />
 
                     {/* MOBILE VIEW */}
                     <figure

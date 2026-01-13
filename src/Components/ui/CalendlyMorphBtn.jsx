@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { gsap } from "gsap";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 
 export default function RequestDemo() {
   const buttonRef = useRef(null);

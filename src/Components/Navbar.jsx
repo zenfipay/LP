@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react"
-import GlassSurface from "../GlassSurface"
-import { Button } from "../ui/button"
+import GlassSurface from "./ui/GlassSurface"
+import { Button } from "./ui/button"
+import {Link} from "react-router-dom"
 
 export default function Navbar() {
 
-    const [ isVisible, setIsVisible ] = useState(false)
+    const [ isVisible, setIsVisible ] = useState(true)
     const [ lastScrollY, setLastScrollY ] = useState(0)
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY
 
-            if( currentScrollY > lastScrollY && currentScrollY > 100 ) {
-                setIsVisible(true)
-            } else if ( currentScrollY < lastScrollY && currentScrollY < 120) {
+            if(currentScrollY > lastScrollY) {
                 setIsVisible(false)
+            } else if(currentScrollY < lastScrollY) {
+                setIsVisible(true)
             }
             setLastScrollY(currentScrollY)
         }
@@ -52,7 +53,11 @@ export default function Navbar() {
                     {/* LINKS */}
                     <ul className="hidden lg:flex items-center gap-2 text-white">
                         <li>Features</li>
-                        <li>FAQs</li>
+                        <li>
+                            <Link to="/frequentlyaskedquestions">
+                                FAQs
+                            </Link>
+                        </li>
                         <li>Blog</li>
                         <li>Contact</li>
 
