@@ -11,7 +11,7 @@ import FrequentlyAskedQuestions from "../Components/HomeComponents/FAQ"
 export default function Home() {
 
   return (
-    <main className="bg-red-200">
+    <main className="bg-white">
       <Navbar />
       <HeroSection />
       <PersonalBusiness />

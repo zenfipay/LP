@@ -13,8 +13,47 @@ export default function Everything() {
     const leftTextRef = useRef(null)
     const rightTextRef = useRef(null)
     const pinnedLayerRef = useRef(null)
-    const leftSideRef = useRef(null)
-    const rightSideRef = useRef(null)
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            gsap.fromTo(
+                leftTextRef.current,
+                {
+                    x:0
+                },
+                {
+                    x:-350,
+                    ease:"none",
+                    scrollTrigger: {
+                        trigger: pinnedLayerRef.current,
+                        start: "top 95%",
+                        end: "bottom 5%",
+                        scrub: 0.8,
+                        markers: true
+                    }
+                }
+            )
+
+            gsap.fromTo(
+                rightTextRef.current,
+                {
+                    x:0
+                },
+                {
+                    x:350,
+                    ease:"none",
+                    scrollTrigger: {
+                        trigger: pinnedLayerRef.current,
+                        start:"top 95%",
+                        end: "bottom 5%",
+                        scrub: 1,
+                    }
+                }
+            )
+        })
+
+        return () => ctx.revert()
+    }, [])
 
     
 
@@ -32,7 +71,7 @@ export default function Everything() {
             <div className="relative w-full min-h-screen flex flex-col lg:flex-row gap-5">
 
                 {/* LEFT SIDE */}
-                <div ref={leftSideRef} className="w-full lg:w-4/12 space-y-5">
+                <div  className="w-full lg:w-4/12 space-y-5">
 
                     {/* LOCATION */}
                     <div className="h-[264.5px] bg-[#FAFAFA] pl-11.5 pr-17 py-8 space-y-15 border border-[#F6F6F6] rounded-3xl">
@@ -86,7 +125,7 @@ export default function Everything() {
 
 
                 {/* RIGHT SIDE */}
-                <div ref={rightSideRef} className=" lg:w-4/12 space-y-5">
+                <div className=" lg:w-4/12 space-y-5">
 
                     {/* PROOF */}
                     <div className="h-[264.5px] bg-[#FAFAFA] pl-11.5 pr-17 py-8 space-y-15 border border-[#F6F6F6] rounded-3xl">

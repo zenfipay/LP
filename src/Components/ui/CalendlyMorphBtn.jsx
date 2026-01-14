@@ -1,47 +1,14 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Button } from "./button";
 
 export default function RequestDemo() {
   const buttonRef = useRef(null);
   const overlayRef = useRef(null);
-  const embedRef = useRef(null);
+  const timeline = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-
-  const timeline = useRef(null);
-  const observer = useRef(null);
-
-  // Load Zoho script once
-  useEffect(() => {
-    if (document.getElementById("zoho-bookings-script")) return;
-
-    const script = document.createElement("script");
-    script.id = "zoho-bookings-script";
-    script.src = "https://bookings.zoho.com/portal-embed.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
-  // Observe iframe load (Zoho has no callback)
-  useEffect(() => {
-    if (!embedRef.current || isLoaded) return;
-
-    observer.current = new MutationObserver(() => {
-      const iframe = embedRef.current.querySelector("iframe");
-      if (iframe) {
-        iframe.onload = () => setIsLoaded(true);
-      }
-    });
-
-    observer.current.observe(embedRef.current, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => observer.current?.disconnect();
-  }, [isLoaded]);
 
   const openBookings = () => {
     const button = buttonRef.current;
@@ -51,6 +18,7 @@ export default function RequestDemo() {
     const rect = button.getBoundingClientRect();
 
     document.body.style.overflow = "hidden";
+    setIsLoaded(false);
 
     gsap.set(overlay, {
       display: "block",
@@ -61,6 +29,7 @@ export default function RequestDemo() {
       borderRadius: 9999,
     });
 
+    timeline.current?.kill();
     timeline.current = gsap.timeline({
       defaults: { duration: 0.6, ease: "power3.inOut" },
       onComplete: () => setIsOpen(true),
@@ -84,11 +53,13 @@ export default function RequestDemo() {
 
     setIsOpen(false);
 
+    timeline.current?.kill();
     timeline.current = gsap.timeline({
       defaults: { duration: 0.5, ease: "power3.inOut" },
       onComplete: () => {
         gsap.set(overlay, { display: "none" });
         document.body.style.overflow = "";
+        setIsLoaded(false);
       },
     });
 
@@ -103,48 +74,40 @@ export default function RequestDemo() {
 
   return (
     <>
-      {/* Trigger Button */}
-      <Button
-        ref={buttonRef}
-        onClick={openBookings}
-        size="lg"
-      >
+      <Button ref={buttonRef} onClick={openBookings} size="lg">
         Request a demo
       </Button>
 
-      {/* Morph Overlay */}
       <div
         ref={overlayRef}
         className="fixed z-50 hidden overflow-hidden bg-white"
       >
-        {/* Close Button */}
         {isOpen && (
           <button
             onClick={closeBookings}
-            className="absolute right-4 top-4 z-20 rounded-full bg-black px-4 py-2 text-white"
+            className="absolute right-4 top-4 z-30 rounded-full bg-black px-4 py-2 text-white"
           >
             Close
           </button>
         )}
 
-        {/* Loader */}
+        {/* Loader overlays iframe */}
         {!isLoaded && isOpen && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-black/20 border-t-black" />
           </div>
         )}
 
-        {/* Cached Zoho Embed */}
-        <div
-          ref={embedRef}
-          className={`h-full w-full transition-opacity duration-300 ${
-            isOpen && isLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          data-zohobookings
-          data-portal-id="YOUR_PORTAL_ID"
-          data-service-id="YOUR_SERVICE_ID"
-          data-theme="light"
-        />
+        {/* Zoho iframe MUST be visible */}
+        {isOpen && (
+          <iframe
+            src="https://zenfipay.zohobookings.com/#/4757755000000049052"
+            className="h-full w-full"
+            frameBorder="0"
+            allowFullScreen
+            onLoad={() => setIsLoaded(true)}
+          />
+        )}
       </div>
     </>
   );

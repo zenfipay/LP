@@ -52,7 +52,7 @@ export default function Features() {
                 {/* FIRST */}
                 <div className="bg-[#101010] w-full lg:w-5/12 lg:h-120 rounded-3xl overflow-hidden">
                     {/* TEXT */}
-                    <div className="w-71 lg:w-84.5 flex flex-col gap-5 mx-auto pt-10.25 lg:mt-11.25 text-white">
+                    <div className="relative w-71 lg:w-84.5 flex flex-col gap-5 mx-auto pt-10.25 lg:pt-10 text-white">
                         <SplitTextHeader
                             text="No changes to your workflow"
                             className="w-56.5 lg:w-62.25 font-inter font-medium text-[20px] lg:text-[24px] leading-[100%]"
@@ -65,9 +65,12 @@ export default function Features() {
 
                     {/* REGSTER */}
                     <motion.figure 
-                        className="pt-17"
+                        initial={{ y:200 }}
+                        animate={{ y:0 }}
+                        transition={{ duration: 1, ease:"easeIn" }}
+                        className="pt-17 lg:pt-1"
                     >
-                        <img src="/icons/zregister.svg" alt="zenfipay register" className="relative top-17 right-26 scale-150" />
+                        <img src="/icons/zregister.svg" alt="zenfipay register" className="relative top-17 lg:top-21 right-26 scale-150 lg:scale-120" />
                     </motion.figure>
                 </div>
 

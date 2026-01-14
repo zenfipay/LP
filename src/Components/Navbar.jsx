@@ -30,7 +30,7 @@ export default function Navbar() {
 
     return (
         <nav 
-            className={`fixed top-5 z-30 w-full transition-transform duration-500 ease-in-out ${
+            className={`fixed top-5 z-20 w-full transition-transform duration-500 ease-in-out ${
                 isVisible ? " translate-y-0" : "-translate-y-24" }`}
         >
             <GlassSurface
@@ -48,7 +48,9 @@ export default function Navbar() {
                 className=" flex justify-start mx-auto p-2 drop-shadow-[#100B40] drop-shadow-md lg:w-10/11" 
             >
                 <div className="w-full flex justify-between items-center">
-                    <img src='/icons/logo.svg' alt="zenfipay logo" loading="lazy" className="w-fit" />
+                    <Link to="/">
+                        <img src='/icons/logo.svg' alt="zenfipay logo" loading="lazy" className="w-fit" />
+                    </Link>
                     
                     {/* LINKS */}
                     <ul className="hidden lg:flex items-center gap-2 text-white">
