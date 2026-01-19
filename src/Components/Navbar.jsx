@@ -2,11 +2,13 @@ import { useState, useEffect } from "react"
 import GlassSurface from "./ui/GlassSurface"
 import { Button } from "./ui/button"
 import {Link} from "react-router-dom"
+import Menu from "./ui/Menu"
 
 export default function Navbar() {
 
     const [ isVisible, setIsVisible ] = useState(true)
     const [ lastScrollY, setLastScrollY ] = useState(0)
+    const [ menuOpen, setMenuOpen ] = useState(false)
 
     useEffect(() => {
         const handleScroll = () => {
@@ -61,7 +63,11 @@ export default function Navbar() {
                             </Link>
                         </li>
                         <li>Blog</li>
-                        <li>Contact</li>
+                        <li>
+                            <a href="mailto:support@zenfipay.com" aria-label="Send an email to ZenFiPay support" className="">
+                                Contact
+                            </a>
+                        </li>
 
                     </ul>
 
@@ -69,9 +75,16 @@ export default function Navbar() {
                     <div className="">
                         {/* FOR MOBILE */}
                         <div className="block lg:hidden text-white">
-                            <span>text</span>
-                            <span>text</span>
+                            <button
+                                className=""
+                                onClick={() => setMenuOpen(true)}
+                            >
+                                <img src="/icons/menu.svg" alt="Menu icon" />
+                            </button>
+                            
                         </div>
+
+                        <Menu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
                         {/* FOR WEB */}
                         <div className="hidden lg:flex items-center gap-4">

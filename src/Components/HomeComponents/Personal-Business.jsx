@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import SplitTextHeader from "../ui/SplitTextHeader"
 import SplitParagraph from "../ui/SplitTextParagraph"
@@ -7,12 +7,6 @@ import RequestDemo from "../ui/CalendlyMorphBtn"
 export default function PersonalBusiness() {
 
     const [ activeTab, setActiveTab ] = useState("personal")
-
-    const sliderVariants = {
-        initial: { x:50, opacity:0 },
-        animate: { x:0, opacity:1 },
-        exit: { x:-50, opacity: 0}
-    }
 
 
     return (
@@ -140,15 +134,3 @@ export default function PersonalBusiness() {
         </section>
     )
 }
-
-
-
-<motion.figure 
-                                            initial={{ y:40 }}
-                                            whileInView={{ y:0 }}
-                                            transition={{ duration:0.5, ease:"easeIn" }}
-                                            viewport={{ once: true}}
-                                            className="pt-10 pr-7"
-                                        >
-                                            <img src="/images/iPhone.png" alt="iphone zenfipay app mockup" className=" scale-195 origin-center lg:scale-none" />
-                                        </motion.figure>

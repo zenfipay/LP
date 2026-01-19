@@ -21,11 +21,11 @@ export default function HeroSection() {
                     {/* TEXT */}
                     <div className=" space-y-5">
                         <SplitText 
-                            className="w-[361px] lg:w-178 lg:h-[300px] text-white font-neue font-medium text-[48px] lg:text-[110px] leading-11.25 lg:leading-25"
+                            className="w-90.75 md:w-178 lg:h-[300px] text-white font-neue font-medium text-[48px] md:text-[90px] lg:text-[110px] leading-11.25 md:leading-17 lg:leading-25"
                             text="Stablecoin payments made simple."
                         />
                         <SplitParagraph
-                            className="lg:w-123.5 font-inter text-[13px] text-[#B0B7C7] leading-[100%] tracking-[0.5px]"
+                            className="w-5/6 lg:w-123.5 font-inter text-[13px] md:text-[15px] text-[#B0B7C7] leading-[100%] tracking-[0.5px]"
                             text="Bringing stablecoin payment into everyday purchases. Accept, send, & settle stablecoin payments instantly"
                         />
                     </div>

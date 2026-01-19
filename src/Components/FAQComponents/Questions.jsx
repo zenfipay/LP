@@ -5,19 +5,87 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 const personalQuestions = [
     {
-        q: "How do customers pay in my store",
-        a:"Customers scan a QR code at checkout and pay using supported stablecoins from their own wallets.",
+        q: "What is Zenfipay",
+        a:"Zenfipay is a payment platform that lets individuals use stablecoins for everyday, real-world payments. It allows you to pay in stores, send money, and spend stablecoins just like regular money",
     },
     {
-        q: "How do customers pay in my store",
-        a:"Customers scan a QR code at checkout and pay using supported stablecoins from their own wallets.",
+        q: "Do I need a Zenfipay account to pay",
+        a:"",
+    },
+    {
+        q: "Can I pay with stablecoins in physical stores",
+        a:"",
+    },
+    {
+        q: "Which stablecoins are supported",
+        a:"",
+    },
+    {
+        q: "How fast are payments",
+        a:"",
+    },
+    {
+        q: "How do I know my payment is successful",
+        a:"",
+    },
+    {
+        q: "Can I earn rewards when I pay",
+        a:"",
+    },
+    {
+        q: "Is Zenfipay secure for users",
+        a:"",
     },
 ]
 
 const businessQuestions = [
     {
-
-    }
+        q: "What type of businesses can use Zenfipay",
+        a:"",
+    },{
+        q: "Do I need to change my checkout process",
+        a:"",
+    },
+    {
+        q: "How do customers pay in my store",
+        a:"Customers scan a QR code at checkout and pay using supported stablecoins from their own wallets.",
+    },
+    {
+        q: "Can I manage multiple cashiers or branches",
+        a:"",
+    },
+    {
+        q: "How do I receive money",
+        a:"",
+    },
+    {
+        q: "Are settlements fast",
+        a:"",
+    },
+    {
+        q: "Can I receive payments in USD, GBP, or EUR",
+        a:"",
+    },
+    {
+        q: "Can I convert between fiat and stablecoins",
+        a:"",
+    },
+    {
+        q: "Are exchange rates and fees transparent",
+        a:"Is Zenfipay secure for businesses",
+    },
+    {
+        q: "Does Zenfipay follow regulations",
+        a:"",
+    },
+    {
+        q: "Where is Zenfipay available",
+        a:"",
+    },
+    {
+        q: "How do businesses get started",
+        a:"",
+    },
 ]
 export default function Questions() {
 
@@ -96,7 +164,7 @@ export default function Questions() {
                                     onClick={(e) => toggleAnswer(index, e.currentTarget.nextElementSibling)}
                                     className="w-full flex justify-between items-center text-[20px] leading-[100%] text-left font-inter font-medium"
                                 >
-                                    <span className="w-3/4">{item.q}</span>
+                                    <span className="w-3/4">{item.q}?</span>
                                     <img 
                                         src="/icons/plusIcon.svg" 
                                         alt="plus icon" 
@@ -132,7 +200,7 @@ export default function Questions() {
                                     onClick={(e) => toggleAnswer(index, e.currentTarget.nextElementSibling)}
                                     className="w-full flex justify-between items-center text-[20px] leading-[100%] text-left font-inter font-medium"
                                 >
-                                    <span className="w-3/4">{item.q}</span>
+                                    <span className="w-3/4">{item.q}?</span>
                                     <img 
                                         src="/icons/plusIcon.svg" 
                                         alt="plus icon" 

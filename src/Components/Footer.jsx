@@ -28,7 +28,7 @@ const linkInfo = [
 ]
 export default function Footer() {
     return (
-        <footer className="relative bg-[#101010] w-full h-124.75 lg:h-screen overflow-hidden">
+        <footer className="relative bg-[#101010] lg:max-w-screen h-124.75 lg:h-screen overflow-hidden">
 
             <div className="w-90.25 mx-auto space-y-11 pt-20 lg:pt-30">
 
@@ -49,12 +49,12 @@ export default function Footer() {
 
                 {/* TEXT LINKS */}
                 <div className="flex justify-center items-center gap-8">
-                    <Link to="">
+                    <Link to="/terms" target="_blank">
                         <span className="font-inter font-normal text-white text-[14px] leading-[100%] tracking-[0.5px]">
                             Terms of service
                         </span>
                     </Link>
-                    <Link to="">
+                    <Link to="/privacy" target="_blank">
                         <span className="font-inter font-normal text-white text-[14px] leading-[100%] tracking-[0.5px]">
                             Privacy policy
                         </span>

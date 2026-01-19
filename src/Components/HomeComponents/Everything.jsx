@@ -29,7 +29,6 @@ export default function Everything() {
                         start: "top 95%",
                         end: "bottom 5%",
                         scrub: 0.8,
-                        markers: true
                     }
                 }
             )

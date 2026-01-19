@@ -3,7 +3,7 @@ import RequestDemo from "./ui/CalendlyMorphBtn"
 
 export default function DigitalCrypto() {
     return (
-        <section className="bg-[#20195F] w-full h-fit px-4 py-5.5 lg:px-20 lg:py-24">
+        <section className="bg-[#20195F] w-full lg:max-w-screen h-fit px-4 py-5.5 lg:px-20 lg:py-24 overflow-hidden">
 
             <div className="h-fit bg-[#014DFF] py-17.25 px-4.5 lg:p-20 rounded-[36px]">
                 <SplitTextHeader

@@ -1,5 +1,11 @@
+import PrivacyHeroSection from "../Components/PrivacyComponents/HeroSection"
+import Policies from "../Components/PrivacyComponents/Policy"
+
 export default function PrivacyPolicy() {
     return (
-        <>Privacy policy</>
+        <main>
+            <PrivacyHeroSection />
+            <Policies />
+        </main>
     )
 }

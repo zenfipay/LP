@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import SplitTextHeader from "../ui/SplitTextHeader";
 import SplitParagraph from "../ui/SplitTextParagraph";
 import OtherHeroGradient from "../ui/OtherHeroGradient";
+import DancingBtn from "../ui/DancingBtn";
 
 
 export default function FAQHeroSection() {
@@ -31,22 +32,19 @@ export default function FAQHeroSection() {
                 </div>
 
                 {/* BUTTONS */}
-                <div className="flex flex-row items-center gap-6">
-                
-                    Button sha
-                </div>
+                <DancingBtn />
             </div>
 
             {/* RIGHT SIDE */}
-                <motion.img 
-                    initial={{ y:-100, opacity:0 }}
-                    animate={{ y:0, opacity:1 }}
-                    transition={{ duration:0.7, ease:"easeIn" }}
-                    src="/icons/leftCoin.svg" 
-                    alt="zenfipay coin icon" 
-                    className=" scale-300 absolute top-120 right-100"
+            <motion.img 
+                initial={{ y:-100, opacity:0 }}
+                animate={{ y:0, opacity:1 }}
+                transition={{ duration:0.7, ease:"easeIn" }}
+                src="/icons/leftCoin.svg" 
+                alt="zenfipay coin icon" 
+                className=" scale-100 lg:scale-200 absolute top-70 lg:top-50 right-10 lg:right-100"
 
-                />
+            />
         </div>
 
         </section>
