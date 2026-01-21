@@ -168,8 +168,8 @@ const GlassSurface = ({
     height: typeof height === "number" ? `${height}px` : height,
     borderRadius,
     background: isDarkMode
-      ? `rgba(0,0,0,${backgroundOpacity})`
-      : `rgba(255,255,255,${backgroundOpacity})`,
+      ? `rgba(255,11,64,${backgroundOpacity})`
+      : `rgba(16,11,64,${backgroundOpacity})`,
     backdropFilter: svgSupported
       ? `url(#${filterId}) saturate(${saturation})`
       : "blur(12px) saturate(1.8)",
@@ -204,6 +204,13 @@ const GlassSurface = ({
       </svg>
 
       <div className="relative z-10 w-full h-full flex items-center justify-center">
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: isDarkMode ? "rgba(16, 11, 64, 0.15" : "rgba(16,11,64,0.3",
+            borderRadius
+          }}
+        />
         {children}
       </div>
     </div>

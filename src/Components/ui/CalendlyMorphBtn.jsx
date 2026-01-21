@@ -4,7 +4,7 @@ export default function RequestDemo({ className="" }) {
   return (
     <>
       <Button
-        className={` relative z-30 ${className}`}
+        className={` relative z-10 ${className}`}
         size="lg"
         onClick={() => {window.open("https://zenfipay.zohobookings.com/#/4757755000000049052", "_blank") }}
       >

@@ -71,17 +71,17 @@ export default function Navbar() {
                     greenOffset={15}
                     blueOffset={25}
                     brightness={60}
-                    opacity={0.57}
+                    opacity={0.3}
                     padding={10}
-                    className=" flex justify-start mx-auto p-2 drop-shadow-[#100B40] drop-shadow-md lg:w-10/11" 
+                    className=" flex justify-start mx-auto drop-shadow-[#100B40]/5 drop-shadow-md lg:w-10/11" 
                 >
-                    <div className="w-full flex justify-between items-center">
+                    <div className="relative z-20 w-full flex px-2 justify-between items-center">
                         <Link to="/">
                             <img src='/icons/logo.svg' alt="zenfipay logo" loading="lazy" className="w-fit" />
                         </Link>
                         
                         {/* LINKS */}
-                        <ul className="hidden lg:flex items-center gap-2 text-white">
+                        <ul className="relative z-20 hidden lg:flex items-center gap-8 text-white text-[15px]">
                             <li 
                                 className="relative"
                                 onMouseEnter={() => setFeaturesHover(true)}
