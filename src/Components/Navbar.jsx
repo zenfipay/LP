@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, Suspense, lazy } from "react"
+import { useState, useEffect, useRef, useCallback, Suspense, lazy, useMemo } from "react"
 import GlassSurface from "./ui/GlassSurface"
 import { Button } from "./ui/button"
 import { Link } from "react-router-dom"
@@ -34,25 +34,57 @@ export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [featuresHover, setFeaturesHover] = useState(false)
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [isPageReady, setIsPageReady] = useState(false)
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
   const menuButtonRef = useRef(null)
+  const isOpeningMenu = useRef(false)
 
-  // Mark initial load as complete after paint
+  // Detect when the page is fully interactive (hero animations complete)
   useEffect(() => {
-    const handleInitialLoad = () => {
-      setIsInitialLoad(false)
+    const handlePageReady = () => {
+      setIsPageReady(true)
     }
     
-    // Use requestAnimationFrame to ensure paint is complete
-    const rafId = requestAnimationFrame(() => {
-      // Small delay to ensure all critical resources are loaded
-      setTimeout(handleInitialLoad, 300)
-    })
+    // Multiple strategies to detect page readiness
+    const strategies = [
+      // 1. DOMContentLoaded
+      () => {
+        if (document.readyState === 'complete') {
+          handlePageReady()
+          return true
+        }
+        return false
+      },
+      
+      // 2. Wait for hero animations (adjust timing based on your hero animations)
+      () => {
+        setTimeout(handlePageReady, 1500) // Adjust this based on your hero animation duration
+        return true
+      },
+      
+      // 3. After first user interaction
+      () => {
+        const handleFirstInteraction = () => {
+          handlePageReady()
+          window.removeEventListener('click', handleFirstInteraction)
+          window.removeEventListener('touchstart', handleFirstInteraction)
+          window.removeEventListener('keydown', handleFirstInteraction)
+        }
+        
+        window.addEventListener('click', handleFirstInteraction, { once: true })
+        window.addEventListener('touchstart', handleFirstInteraction, { once: true })
+        window.addEventListener('keydown', handleFirstInteraction, { once: true })
+        return true
+      }
+    ]
+    
+    // Try strategies in order
+    strategies[0]() || strategies[1]() || strategies[2]()
     
     return () => {
-      cancelAnimationFrame(rafId)
+      // Cleanup
+      setIsPageReady(true)
     }
   }, [])
 
@@ -86,32 +118,81 @@ export default function Navbar() {
     }
   }, [])
 
-  // Optimized menu handlers with initial load consideration
+  // Optimized menu handlers with page readiness consideration
   const handleMenuOpen = useCallback(() => {
-    if (isInitialLoad) {
-      // On initial load, defer to next animation frame to avoid paint competition
-      requestAnimationFrame(() => {
-        setMenuOpen(true)
-      })
-    } else {
+    if (isOpeningMenu.current) return // Prevent double clicks
+    
+    isOpeningMenu.current = true
+    
+    const openMenu = () => {
+      // Force synchronous layout before opening menu to avoid paint competition
+      if (!isPageReady) {
+        // If page isn't ready, pause heavy animations in hero section
+        pauseHeroAnimations()
+      }
+      
       setMenuOpen(true)
+      
+      // Reset after animation would complete
+      setTimeout(() => {
+        isOpeningMenu.current = false
+      }, 300)
     }
-  }, [isInitialLoad])
+    
+    // Always use requestAnimationFrame for smooth opening
+    requestAnimationFrame(() => {
+      requestAnimationFrame(openMenu) // Double RAF for better timing
+    })
+  }, [isPageReady])
 
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false)
   }, [])
 
+  // Function to pause/resume hero animations
+  const pauseHeroAnimations = useCallback(() => {
+    // Find and pause any heavy animations in hero section
+    const heroSection = document.querySelector('section, .hero, [class*="hero"], main > div:first-child')
+    if (heroSection) {
+      // Pause videos
+      const videos = heroSection.querySelectorAll('video')
+      videos.forEach(video => video.pause())
+      
+      // Pause CSS animations
+      heroSection.style.animationPlayState = 'paused'
+      heroSection.querySelectorAll('*').forEach(el => {
+        if (window.getComputedStyle(el).animationName !== 'none') {
+          el.style.animationPlayState = 'paused'
+        }
+      })
+      
+      // Resume after menu closes
+      setTimeout(() => {
+        heroSection.style.animationPlayState = ''
+        heroSection.querySelectorAll('*').forEach(el => {
+          el.style.animationPlayState = ''
+        })
+        videos.forEach(video => {
+          if (!video.paused) video.play()
+        })
+      }, 50)
+    }
+  }, [])
+
   // Prevent body scroll when menu is open with optimization
   useEffect(() => {
     if (menuOpen) {
-      // Batch style changes
+      // Batch style changes with priority
       requestAnimationFrame(() => {
+        // Force layout calculation before style changes
+        document.body.getBoundingClientRect()
+        
         document.body.style.overflow = 'hidden'
         document.body.style.touchAction = 'none'
-        // Calculate scrollbar width to prevent layout shift
-        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-        if (scrollbarWidth > 0) {
+        
+        // Calculate scrollbar width only if needed
+        if (window.innerWidth > document.documentElement.clientWidth) {
+          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
           document.body.style.paddingRight = scrollbarWidth + 'px'
         }
       })
@@ -134,21 +215,68 @@ export default function Navbar() {
 
   // Preload critical resources for better menu performance
   useEffect(() => {
-    // Preload menu icon
-    const preloadImage = (src) => {
-      const img = new Image()
-      img.src = src
-    }
+    // Preload menu icon immediately
+    const menuIcon = new Image()
+    menuIcon.src = '/icons/menu.svg'
     
-    preloadImage('/icons/menu.svg')
-    
-    // Preload any other critical menu resources
-    if (typeof window !== 'undefined' && window.requestIdleCallback) {
-      window.requestIdleCallback(() => {
-        // Preload menu backdrop image if any
+    // Preload other critical assets after page is idle
+    const preloadAssets = () => {
+      // Preload any menu-specific images
+      const menuImages = [
+        '/icons/close.svg', // If your menu has a close button
+        // Add other menu assets here
+      ]
+      
+      menuImages.forEach(src => {
+        const img = new Image()
+        img.src = src
       })
     }
+    
+    // Use idle callback or timeout
+    if (typeof window !== 'undefined' && window.requestIdleCallback) {
+      window.requestIdleCallback(preloadAssets, { timeout: 2000 })
+    } else {
+      setTimeout(preloadAssets, 1000)
+    }
   }, [])
+
+  // Memoize the menu button to prevent unnecessary re-renders
+  const menuButton = useMemo(() => (
+    <button
+      ref={menuButtonRef}
+      onClick={handleMenuOpen}
+      className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all active:scale-95 transform-gpu will-change-transform relative"
+      aria-label="Open menu"
+      aria-expanded={menuOpen}
+      aria-haspopup="true"
+      disabled={isOpeningMenu.current}
+      style={{ 
+        WebkitTapHighlightColor: 'transparent',
+        backfaceVisibility: 'hidden'
+      }}
+    >
+      <img 
+        src="/icons/menu.svg" 
+        alt="Menu icon" 
+        width={24}
+        height={24}
+        loading="eager"
+        decoding="async"
+        className="transform-gpu"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none'
+        }}
+      />
+      {/* Loading indicator for slow opening */}
+      {isOpeningMenu.current && !menuOpen && (
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        </span>
+      )}
+    </button>
+  ), [handleMenuOpen, menuOpen, isOpeningMenu.current])
 
   return (
     <>
@@ -156,6 +284,10 @@ export default function Navbar() {
         className={`fixed top-5 z-20 w-full transition-transform duration-500 ease-in-out will-change-transform transform-gpu ${
           isVisible ? "translate-y-0" : "-translate-y-24"
         }`}
+        style={{ 
+          contain: 'layout style paint',
+          backfaceVisibility: 'hidden'
+        }}
       >
         <GlassSurface
           width
@@ -219,24 +351,7 @@ export default function Navbar() {
             <div className="flex items-center">
               {/* FOR MOBILE */}
               <div className="block lg:hidden">
-                <button
-                  ref={menuButtonRef}
-                  onClick={handleMenuOpen}
-                  className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all active:scale-95 transform-gpu"
-                  aria-label="Open menu"
-                  aria-expanded={menuOpen}
-                  aria-haspopup="true"
-                >
-                  <img 
-                    src="/icons/menu.svg" 
-                    alt="Menu icon" 
-                    width={24}
-                    height={24}
-                    loading="eager"
-                    decoding="async"
-                    className="transform-gpu"
-                  />
-                </button>
+                {menuButton}
               </div>
 
               {/* Menu Component - Lazy loaded with Suspense */}
