@@ -109,7 +109,11 @@ export default function Navbar() {
       requestAnimationFrame(() => {
         document.body.style.overflow = 'hidden'
         document.body.style.touchAction = 'none'
-        document.body.style.paddingRight = window.innerWidth - document.documentElement.clientWidth + 'px'
+        // Calculate scrollbar width to prevent layout shift
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+        if (scrollbarWidth > 0) {
+          document.body.style.paddingRight = scrollbarWidth + 'px'
+        }
       })
     } else {
       requestAnimationFrame(() => {
@@ -131,7 +135,7 @@ export default function Navbar() {
   // Preload critical resources for better menu performance
   useEffect(() => {
     // Preload menu icon
-    const preloadImage = (src: string) => {
+    const preloadImage = (src) => {
       const img = new Image()
       img.src = src
     }
@@ -139,8 +143,8 @@ export default function Navbar() {
     preloadImage('/icons/menu.svg')
     
     // Preload any other critical menu resources
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => {
+    if (typeof window !== 'undefined' && window.requestIdleCallback) {
+      window.requestIdleCallback(() => {
         // Preload menu backdrop image if any
       })
     }
