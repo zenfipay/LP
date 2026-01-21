@@ -39,7 +39,7 @@ export default function Navbar() {
   const navRef = useRef(null)
   const hideTimeoutRef = useRef(null)
   const showTimeoutRef = useRef(null)
-  const isScrolling = useRef(false)
+  const isOpeningMenu = useRef(false)
 
   // Cleanup on unmount
   useEffect(() => {
@@ -49,16 +49,19 @@ export default function Navbar() {
     }
   }, [])
 
-  // FIXED: Optimized scroll handler that prevents premature hiding
+  // Optimized scroll handler
   useEffect(() => {
+    let animationFrameId = null
+    
     const handleScroll = () => {
       if (!ticking.current) {
-        window.requestAnimationFrame(() => {
+        ticking.current = true
+        animationFrameId = requestAnimationFrame(() => {
           const currentScrollY = window.scrollY
           const scrollDelta = currentScrollY - lastScrollY.current
           
-          // Ignore tiny scroll movements (< 5px) to prevent flickering
-          if (Math.abs(scrollDelta) < 5) {
+          // Ignore tiny scroll movements (< 3px) to prevent flickering
+          if (Math.abs(scrollDelta) < 3) {
             ticking.current = false
             return
           }
@@ -69,23 +72,19 @@ export default function Navbar() {
           if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
           if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current)
           
-          if (scrollingDown && currentScrollY > 250) { // Increased threshold
+          if (scrollingDown && currentScrollY > 200) {
             // Only hide if user is intentionally scrolling down
             hideTimeoutRef.current = setTimeout(() => {
               setIsVisible(false)
-            }, 150) // Increased delay before hiding
+            }, 100)
           } else if (!scrollingDown) {
-            // Show immediately when scrolling up, but with small delay for smoothness
-            showTimeoutRef.current = setTimeout(() => {
-              setIsVisible(true)
-            }, 50)
+            // Show immediately when scrolling up
+            setIsVisible(true)
           }
           
           lastScrollY.current = currentScrollY
           ticking.current = false
         })
-        
-        ticking.current = true
       }
     }
 
@@ -95,47 +94,88 @@ export default function Navbar() {
       window.removeEventListener('scroll', handleScroll)
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
       if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current)
+      if (animationFrameId) cancelAnimationFrame(animationFrameId)
     }
   }, [])
 
-  // Optimized menu handlers
+  // FIXED: Optimized menu handler with immediate response
   const handleMenuOpen = useCallback(() => {
+    // Prevent double clicks
+    if (isOpeningMenu.current) return
+    
+    isOpeningMenu.current = true
+    
+    // Immediate visual feedback
+    if (menuButtonRef.current) {
+      menuButtonRef.current.style.transform = 'scale(0.95)'
+      setTimeout(() => {
+        if (menuButtonRef.current) {
+          menuButtonRef.current.style.transform = ''
+        }
+      }, 150)
+    }
+    
+    // Open menu immediately
     setMenuOpen(true)
+    
+    // Reset flag after a reasonable time
+    setTimeout(() => {
+      isOpeningMenu.current = false
+    }, 500)
   }, [])
 
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false)
   }, [])
 
-  // Prevent body scroll when menu is open
+  // Optimized body scroll lock
   useEffect(() => {
     if (menuOpen) {
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
       document.body.style.overflow = 'hidden'
-      // Store scroll position to restore later
-      document.documentElement.style.scrollBehavior = 'auto'
     } else {
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
       document.body.style.overflow = ''
-      document.documentElement.style.scrollBehavior = ''
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
     
     return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
       document.body.style.overflow = ''
-      document.documentElement.style.scrollBehavior = ''
     }
   }, [menuOpen])
 
-  // Memoize the menu button
+  // Preload menu icon for faster response
+  useEffect(() => {
+    const img = new Image()
+    img.src = '/icons/menu.svg'
+  }, [])
+
+  // Memoize the menu button with immediate feedback
   const menuButton = useMemo(() => (
     <button
       ref={menuButtonRef}
       onClick={handleMenuOpen}
-      className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+      className="text-white p-2 rounded-lg active:scale-95 transition-transform duration-100"
       aria-label="Open menu"
       aria-expanded={menuOpen}
       aria-haspopup="true"
       style={{ 
         WebkitTapHighlightColor: 'transparent',
-        outline: 'none'
+        outline: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none'
       }}
     >
       <img 
@@ -145,6 +185,10 @@ export default function Navbar() {
         height={24}
         loading="eager"
         decoding="async"
+        style={{ 
+          pointerEvents: 'none',
+          display: 'block'
+        }}
       />
     </button>
   ), [handleMenuOpen, menuOpen])
@@ -192,16 +236,21 @@ export default function Navbar() {
           backfaceVisibility: 'hidden'
         }}
       >
-        {/* Glass effect navbar */}
+        {/* DARKER Glass effect navbar - improved contrast */}
         <div 
           className="flex justify-start mx-auto lg:w-10/11 p-3"
           style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(12px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            // DARKER background for better contrast
+            background: 'rgba(10, 10, 20, 0.75)',
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '24px',
-            boxShadow: '0 4px 6px -1px rgba(16, 11, 64, 0.05), 0 2px 4px -1px rgba(16, 11, 64, 0.03)',
+            boxShadow: `
+              0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.1)
+            `,
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden'
           }}
@@ -226,24 +275,24 @@ export default function Navbar() {
                 onMouseEnter={() => setFeaturesHover(true)}
                 onMouseLeave={() => setFeaturesHover(false)}
               >
-                <button className="cursor-pointer px-2 py-1 hover:text-blue-200 transition-colors duration-200">
+                <button className="cursor-pointer px-2 py-1 hover:text-blue-300 transition-colors duration-200">
                   Features
                 </button>
               </li>
               <li>
                 <Link 
                   to="/frequentlyaskedquestions"
-                  className="hover:text-blue-200 transition-colors duration-200"
+                  className="hover:text-blue-300 transition-colors duration-200"
                 >
                   FAQs
                 </Link>
               </li>
-              <li className="text-gray-400 cursor-not-allowed">Blog</li>
+              <li className="text-gray-300 cursor-not-allowed">Blog</li>
               <li>
                 <a 
                   href="mailto:support@zenfipay.com" 
                   aria-label="Send an email to ZenFiPay support"
-                  className="hover:text-blue-200 transition-colors duration-200"
+                  className="hover:text-blue-300 transition-colors duration-200"
                 >
                   Contact
                 </a>
@@ -265,13 +314,13 @@ export default function Navbar() {
               {/* Desktop Buttons */}
               <div className="hidden lg:flex items-center gap-4 ml-4">
                 <Button
-                  className="bg-[#2B2B2B] text-white hover:bg-[#3B3B3B] transition-colors duration-200"
+                  className="bg-gray-800 text-white hover:bg-gray-700 transition-colors duration-200 border border-gray-700"
                   size="lg"
                 >
                   Sign in
                 </Button>
                 <Button
-                  className="bg-[#014DFF] text-white hover:bg-[#0155FF] transition-colors duration-200"
+                  className="bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
                   size="lg"
                   onClick={() => {window.open("https://zenfipay.zohobookings.com/#/4757755000000049052", "_blank")}}
                 >
