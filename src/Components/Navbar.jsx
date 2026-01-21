@@ -40,6 +40,7 @@ export default function Navbar() {
   const hideTimeoutRef = useRef(null)
   const showTimeoutRef = useRef(null)
   const isOpeningMenu = useRef(false)
+  const scrollPosition = useRef(0)
 
   // Cleanup on unmount
   useEffect(() => {
@@ -98,10 +99,13 @@ export default function Navbar() {
     }
   }, [])
 
-  // FIXED: Optimized menu handler with immediate response
+  // FIXED: Optimized menu handler with scroll position fix
   const handleMenuOpen = useCallback(() => {
     // Prevent double clicks
     if (isOpeningMenu.current) return
+    
+    // Store current scroll position BEFORE opening menu
+    scrollPosition.current = window.scrollY
     
     isOpeningMenu.current = true
     
@@ -124,35 +128,52 @@ export default function Navbar() {
     }, 500)
   }, [])
 
+  // FIXED: Menu close handler with proper scroll restoration
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false)
+    
+    // Restore scroll position AFTER menu animation completes
+    setTimeout(() => {
+      if (scrollPosition.current !== undefined) {
+        // Use smooth scroll for better UX
+        window.scrollTo({
+          top: scrollPosition.current,
+          behavior: 'smooth'
+        })
+      }
+    }, 50) // Small delay to ensure menu is fully closed
   }, [])
 
-  // Optimized body scroll lock
+  // Optimized body scroll lock - FIXED version
   useEffect(() => {
     if (menuOpen) {
-      const scrollY = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
+      // Store scroll position
+      scrollPosition.current = window.scrollY
+      
+      // Apply styles without affecting layout
       document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollPosition.current}px`
+      document.body.style.width = '100%'
+      document.body.style.height = '100%'
     } else {
-      const scrollY = document.body.style.top
+      // Remove styles
+      document.body.style.overflow = ''
       document.body.style.position = ''
       document.body.style.top = ''
       document.body.style.width = ''
-      document.body.style.overflow = ''
+      document.body.style.height = ''
       
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
-      }
+      // Scroll restoration is now handled in handleMenuClose
     }
     
     return () => {
+      // Cleanup on unmount
+      document.body.style.overflow = ''
       document.body.style.position = ''
       document.body.style.top = ''
       document.body.style.width = ''
-      document.body.style.overflow = ''
+      document.body.style.height = ''
     }
   }, [menuOpen])
 
@@ -236,26 +257,45 @@ export default function Navbar() {
           backfaceVisibility: 'hidden'
         }}
       >
-        {/* DARKER Glass effect navbar - improved contrast */}
+        {/* IMPROVED Glass effect navbar - Better balance of transparency and contrast */}
         <div 
           className="flex justify-start mx-auto lg:w-10/11 p-3"
           style={{
-            // DARKER background for better contrast
-            background: 'rgba(10, 10, 20, 0.75)',
-            backdropFilter: 'blur(16px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            // Balanced color for glass effect - dark but transparent
+            background: 'linear-gradient(135deg, rgba(30, 30, 50, 0.85) 0%, rgba(20, 20, 40, 0.9) 100%)',
+            backdropFilter: 'blur(20px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '24px',
             boxShadow: `
-              0 4px 6px -1px rgba(0, 0, 0, 0.1),
-              0 2px 4px -1px rgba(0, 0, 0, 0.06),
-              inset 0 1px 0 0 rgba(255, 255, 255, 0.1)
+              0 8px 32px rgba(0, 0, 0, 0.2),
+              0 2px 8px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.2)
             `,
             transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden'
+            backfaceVisibility: 'hidden',
+            // Subtle gradient overlay for better readability
+            position: 'relative'
           }}
         >
-          <div className="relative z-20 w-full flex justify-between items-center">
+          {/* Optional: Add a subtle noise texture for better glass effect */}
+          <div 
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: '24px',
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E")',
+              opacity: 0.4,
+              pointerEvents: 'none',
+              mixBlendMode: 'overlay'
+            }}
+          />
+          
+          <div className="relative z-10 w-full flex justify-between items-center">
             <Link to="/" aria-label="Zenfipay homepage">
               <img 
                 src='/icons/logo.svg' 
@@ -265,34 +305,50 @@ export default function Navbar() {
                 width={120}
                 height={40}
                 decoding="async"
+                style={{
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                }}
               />
             </Link>
             
             {/* Desktop Links */}
-            <ul className="relative z-20 hidden lg:flex items-center gap-8 text-white text-[15px]">
+            <ul className="relative z-10 hidden lg:flex items-center gap-8 text-white text-[15px]">
               <li 
                 className="relative"
                 onMouseEnter={() => setFeaturesHover(true)}
                 onMouseLeave={() => setFeaturesHover(false)}
               >
-                <button className="cursor-pointer px-2 py-1 hover:text-blue-300 transition-colors duration-200">
+                <button 
+                  className="cursor-pointer px-4 py-2 hover:text-white transition-colors duration-200 rounded-lg hover:bg-white/10"
+                  style={{
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
                   Features
                 </button>
               </li>
               <li>
                 <Link 
                   to="/frequentlyaskedquestions"
-                  className="hover:text-blue-300 transition-colors duration-200"
+                  className="px-4 py-2 hover:text-white transition-colors duration-200 rounded-lg hover:bg-white/10"
+                  style={{
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                  }}
                 >
                   FAQs
                 </Link>
               </li>
-              <li className="text-gray-300 cursor-not-allowed">Blog</li>
+              <li className="px-4 py-2 text-gray-300 cursor-not-allowed rounded-lg">
+                Blog
+              </li>
               <li>
                 <a 
                   href="mailto:support@zenfipay.com" 
                   aria-label="Send an email to ZenFiPay support"
-                  className="hover:text-blue-300 transition-colors duration-200"
+                  className="px-4 py-2 hover:text-white transition-colors duration-200 rounded-lg hover:bg-white/10"
+                  style={{
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                  }}
                 >
                   Contact
                 </a>
@@ -314,15 +370,23 @@ export default function Navbar() {
               {/* Desktop Buttons */}
               <div className="hidden lg:flex items-center gap-4 ml-4">
                 <Button
-                  className="bg-gray-800 text-white hover:bg-gray-700 transition-colors duration-200 border border-gray-700"
+                  className="bg-white/10 text-white hover:bg-white/20 transition-all duration-200 border border-white/20 backdrop-blur-sm"
                   size="lg"
+                  style={{
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                  }}
                 >
                   Sign in
                 </Button>
                 <Button
-                  className="bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200 border border-blue-400/30"
                   size="lg"
                   onClick={() => {window.open("https://zenfipay.zohobookings.com/#/4757755000000049052", "_blank")}}
+                  style={{
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                  }}
                 >
                   Get started
                 </Button>
@@ -341,7 +405,10 @@ export default function Navbar() {
           style={dropdownStyle}
         >
           <div 
-            className="bg-white flex items-center gap-4 p-4 border border-gray-200 rounded-2xl min-w-75 shadow-xl"
+            className="bg-white/95 backdrop-blur-md flex items-center gap-4 p-6 border border-gray-300/50 rounded-2xl min-w-80 shadow-2xl"
+            style={{
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05)'
+            }}
           >
             <div className="flex-shrink-0">
               <img 
