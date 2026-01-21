@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import GlassSurface from "./ui/GlassSurface"
 import { Button } from "./ui/button"
 import {Link} from "react-router-dom"
@@ -31,34 +31,45 @@ const features = [
 export default function Navbar() {
 
     const [ isVisible, setIsVisible ] = useState(true)
-    const [ lastScrollY, setLastScrollY ] = useState(0)
     const [ menuOpen, setMenuOpen ] = useState(false)
     const [ featuresHover, setFeaturesHover ] = useState(false)
+    const lastScrollY = useRef(0)
+    const ticking = useRef(false)
 
     useEffect(() => {
         const handleScroll = () => {
-            const currentScrollY = window.scrollY
-
-            if(currentScrollY > lastScrollY) {
-                setIsVisible(false)
-            } else if(currentScrollY < lastScrollY) {
-                setIsVisible(true)
+            if (!ticking.current) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY
+                    
+                    // Only hide navbar when scrolling down past 100px
+                    if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+                        setIsVisible(false)
+                    } else if (currentScrollY < lastScrollY.current) {
+                        setIsVisible(true)
+                    }
+                    
+                    lastScrollY.current = currentScrollY
+                    ticking.current = false
+                })
+                
+                ticking.current = true
             }
-            setLastScrollY(currentScrollY)
         }
 
-        window.addEventListener('scroll', handleScroll)
+        // Use passive: true for better scroll performance
+        window.addEventListener('scroll', handleScroll, { passive: true })
 
         return () => {
             window.removeEventListener('scroll', handleScroll)
         }
-    }, [lastScrollY]);
+    }, [])
 
 
     return (
         <>
             <nav 
-                className={`fixed top-5 z-20 w-full transition-transform duration-500 ease-in-out ${
+                className={`fixed top-5 z-20 w-full transition-transform duration-500 ease-in-out will-change-transform ${
                     isVisible ? " translate-y-0" : "-translate-y-24" }`}
             >
                 <GlassSurface
@@ -145,15 +156,15 @@ export default function Navbar() {
             <AnimatePresence>
                 {featuresHover && (
                     <motion.div
-                        initial={{ scaleX:0 }}
-                        animate={{ scaleX:1 }}
-                        exit={{ scaleX:0 }}
-                        transition={{ duration:0.3, ease:"easeInOut" }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
                         onMouseEnter={() => setFeaturesHover(true)}
                         onMouseLeave={() => setFeaturesHover(false)}
-                        className="fixed top-22.5 left-1/2 -translate-x-1/2 z-30 origin-left"
+                        className="fixed top-22.5 left-1/2 -translate-x-1/2 z-30 transform-gpu"
                     >
-                        <div className="bg-white flex items-center gap-4 p-4 border-[0.5px] border-[#100B40]/20 rounded-2xl min-w-75">
+                        <div className="bg-white flex items-center gap-4 p-4 border-[0.5px] border-[#100B40]/20 rounded-2xl min-w-75 shadow-lg">
                             <div className="">
                                 <img src="/icons/coinDrop.svg" alt="coin drop image" />
                             </div>
@@ -163,7 +174,7 @@ export default function Navbar() {
                                         key={feature.title}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05 }}
+                                        transition={{ delay: index * 0.03 }}
                                         className="flex flex-col gap-1 p-3 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                                     >
                                         <h6 className="text-[#20195F] text-[14px] leading-tight font-medium">
