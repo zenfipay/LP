@@ -131,6 +131,7 @@ export default function Navbar() {
                                 <Button
                                     className="bg-[#014DFF] text-white"
                                     size="lg"
+                                    onClick={() => {window.open("https://zenfipay.zohobookings.com/#/4757755000000049052", "_blank") }}
                                 >
                                     Get started
                                 </Button>
