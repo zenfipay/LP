@@ -101,7 +101,7 @@ export default function Navbar() {
     }
   }, [])
 
-  // Optimized menu handler
+  // Optimized menu handler - INSTANT OPEN
   const handleMenuOpen = useCallback(() => {
     if (isOpeningMenu.current) return
     
@@ -110,17 +110,7 @@ export default function Navbar() {
     
     isOpeningMenu.current = true
     
-    // Immediate visual feedback
-    if (menuButtonRef.current) {
-      menuButtonRef.current.style.transform = 'scale(0.95)'
-      setTimeout(() => {
-        if (menuButtonRef.current) {
-          menuButtonRef.current.style.transform = ''
-        }
-      }, 150)
-    }
-    
-    // Open menu immediately
+    // Open menu immediately - NO DELAY
     setMenuOpen(true)
     
     // Reset flag
@@ -178,12 +168,12 @@ export default function Navbar() {
     img.src = '/icons/menu.svg'
   }, [])
 
-  // Memoize the menu button
+  // Memoize the menu button - UPDATED FOR INSTANT RESPONSE
   const menuButton = useMemo(() => (
     <button
       ref={menuButtonRef}
       onClick={handleMenuOpen}
-      className="text-white p-2 rounded-lg active:scale-95 transition-transform duration-100"
+      className="text-white p-2 rounded-lg"
       aria-label="Open menu"
       aria-expanded={menuOpen}
       aria-haspopup="true"
@@ -191,7 +181,8 @@ export default function Navbar() {
         WebkitTapHighlightColor: 'transparent',
         outline: 'none',
         WebkitUserSelect: 'none',
-        userSelect: 'none'
+        userSelect: 'none',
+        touchAction: 'manipulation' // Improves touch responsiveness
       }}
     >
       <img 
@@ -251,20 +242,20 @@ export default function Navbar() {
           willChange: 'transform'
         }}
       >
-        {/* ORIGINAL Glass effect - grey/white theme */}
+        {/* UPDATED Glass effect with blue tint */}
         <div 
           className="flex justify-start mx-auto lg:w-10/11 p-3"
           style={{
-            // Original grey/white glass effect
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(12px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            // Blue-tinted glass effect
+            background: 'rgba(59, 130, 246, 0.15)',
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            border: '1px solid rgba(96, 165, 250, 0.25)',
             borderRadius: '24px',
             boxShadow: `
-              0 4px 6px -1px rgba(16, 11, 64, 0.05),
-              0 2px 4px -1px rgba(16, 11, 64, 0.03),
-              inset 0 1px 0 rgba(255, 255, 255, 0.05)
+              0 4px 20px -2px rgba(37, 99, 235, 0.15),
+              0 2px 8px -1px rgba(37, 99, 235, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2)
             `,
           }}
         >
