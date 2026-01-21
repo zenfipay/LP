@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, Suspense, lazy, useMemo } fro
 import GlassSurface from "./ui/GlassSurface"
 import { Button } from "./ui/button"
 import { Link } from "react-router-dom"
-import { AnimatePresence, motion } from "framer-motion"
 
 const features = [
   {
@@ -34,226 +33,121 @@ export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [featuresHover, setFeaturesHover] = useState(false)
-  const [isPageReady, setIsPageReady] = useState(false)
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
   const menuButtonRef = useRef(null)
   const isOpeningMenu = useRef(false)
+  const navRef = useRef(null)
+  const dropdownRef = useRef(null)
+  const scrollTimeout = useRef(null)
 
-  // Detect when the page is fully interactive (hero animations complete)
+  // SIMPLIFIED: Remove page readiness detection for better performance
   useEffect(() => {
-    const handlePageReady = () => {
-      setIsPageReady(true)
-    }
-    
-    // Multiple strategies to detect page readiness
-    const strategies = [
-      // 1. DOMContentLoaded
-      () => {
-        if (document.readyState === 'complete') {
-          handlePageReady()
-          return true
-        }
-        return false
-      },
-      
-      // 2. Wait for hero animations (adjust timing based on your hero animations)
-      () => {
-        setTimeout(handlePageReady, 1500) // Adjust this based on your hero animation duration
-        return true
-      },
-      
-      // 3. After first user interaction
-      () => {
-        const handleFirstInteraction = () => {
-          handlePageReady()
-          window.removeEventListener('click', handleFirstInteraction)
-          window.removeEventListener('touchstart', handleFirstInteraction)
-          window.removeEventListener('keydown', handleFirstInteraction)
-        }
-        
-        window.addEventListener('click', handleFirstInteraction, { once: true })
-        window.addEventListener('touchstart', handleFirstInteraction, { once: true })
-        window.addEventListener('keydown', handleFirstInteraction, { once: true })
-        return true
-      }
-    ]
-    
-    // Try strategies in order
-    strategies[0]() || strategies[1]() || strategies[2]()
-    
+    // Cleanup function
     return () => {
-      // Cleanup
-      setIsPageReady(true)
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current)
+      }
     }
   }, [])
 
-  // Optimized scroll handler
+  // HIGHLY OPTIMIZED scroll handler - Minimal calculations
   useEffect(() => {
     const handleScroll = () => {
       if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY
-          
-          // Only hide navbar when scrolling down past 100px
-          if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-            setIsVisible(false)
-          } else if (currentScrollY < lastScrollY.current) {
-            setIsVisible(true)
-          }
-          
-          lastScrollY.current = currentScrollY
-          ticking.current = false
-        })
+        const currentScrollY = window.scrollY
+        const scrollingDown = currentScrollY > lastScrollY.current
         
-        ticking.current = true
+        // SIMPLE THRESHOLD CHECK - minimal calculations
+        if (scrollingDown && currentScrollY > 100) {
+          setIsVisible(false)
+        } else if (!scrollingDown) {
+          setIsVisible(true)
+        }
+        
+        lastScrollY.current = currentScrollY
+        ticking.current = false
       }
+    }
+
+    // Ultra-light throttling - better than requestAnimationFrame for scroll
+    const throttledScroll = () => {
+      if (ticking.current) return
+      
+      ticking.current = true
+      handleScroll()
+      
+      // Throttle to ~30fps for scroll (smoother than 60fps for this use case)
+      setTimeout(() => {
+        ticking.current = false
+      }, 32) // ~30fps
     }
 
     // Use passive: true for better scroll performance
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', throttledScroll, { passive: true })
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('scroll', throttledScroll)
     }
   }, [])
 
-  // Optimized menu handlers with page readiness consideration
+  // Optimized menu handlers
   const handleMenuOpen = useCallback(() => {
-    if (isOpeningMenu.current) return // Prevent double clicks
+    if (isOpeningMenu.current) return
     
     isOpeningMenu.current = true
+    setMenuOpen(true)
     
-    const openMenu = () => {
-      // Force synchronous layout before opening menu to avoid paint competition
-      if (!isPageReady) {
-        // If page isn't ready, pause heavy animations in hero section
-        pauseHeroAnimations()
-      }
-      
-      setMenuOpen(true)
-      
-      // Reset after animation would complete
-      setTimeout(() => {
-        isOpeningMenu.current = false
-      }, 300)
-    }
-    
-    // Always use requestAnimationFrame for smooth opening
-    requestAnimationFrame(() => {
-      requestAnimationFrame(openMenu) // Double RAF for better timing
-    })
-  }, [isPageReady])
+    // Reset flag after reasonable time
+    setTimeout(() => {
+      isOpeningMenu.current = false
+    }, 300)
+  }, [])
 
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false)
   }, [])
 
-  // Function to pause/resume hero animations
-  const pauseHeroAnimations = useCallback(() => {
-    // Find and pause any heavy animations in hero section
-    const heroSection = document.querySelector('section, .hero, [class*="hero"], main > div:first-child')
-    if (heroSection) {
-      // Pause videos
-      const videos = heroSection.querySelectorAll('video')
-      videos.forEach(video => video.pause())
-      
-      // Pause CSS animations
-      heroSection.style.animationPlayState = 'paused'
-      heroSection.querySelectorAll('*').forEach(el => {
-        if (window.getComputedStyle(el).animationName !== 'none') {
-          el.style.animationPlayState = 'paused'
-        }
-      })
-      
-      // Resume after menu closes
-      setTimeout(() => {
-        heroSection.style.animationPlayState = ''
-        heroSection.querySelectorAll('*').forEach(el => {
-          el.style.animationPlayState = ''
-        })
-        videos.forEach(video => {
-          if (!video.paused) video.play()
-        })
-      }, 50)
-    }
-  }, [])
-
-  // Prevent body scroll when menu is open with optimization
+  // Prevent body scroll when menu is open - SIMPLIFIED
   useEffect(() => {
     if (menuOpen) {
-      // Batch style changes with priority
-      requestAnimationFrame(() => {
-        // Force layout calculation before style changes
-        document.body.getBoundingClientRect()
-        
-        document.body.style.overflow = 'hidden'
-        document.body.style.touchAction = 'none'
-        
-        // Calculate scrollbar width only if needed
-        if (window.innerWidth > document.documentElement.clientWidth) {
-          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-          document.body.style.paddingRight = scrollbarWidth + 'px'
-        }
-      })
+      // Store current scroll position
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
     } else {
-      requestAnimationFrame(() => {
-        document.body.style.overflow = ''
-        document.body.style.touchAction = ''
-        document.body.style.paddingRight = ''
-      })
+      // Restore scroll position
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
     
     return () => {
-      requestAnimationFrame(() => {
-        document.body.style.overflow = ''
-        document.body.style.touchAction = ''
-        document.body.style.paddingRight = ''
-      })
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
     }
   }, [menuOpen])
 
-  // Preload critical resources for better menu performance
-  useEffect(() => {
-    // Preload menu icon immediately
-    const menuIcon = new Image()
-    menuIcon.src = '/icons/menu.svg'
-    
-    // Preload other critical assets after page is idle
-    const preloadAssets = () => {
-      // Preload any menu-specific images
-      const menuImages = [
-        '/icons/close.svg', // If your menu has a close button
-        // Add other menu assets here
-      ]
-      
-      menuImages.forEach(src => {
-        const img = new Image()
-        img.src = src
-      })
-    }
-    
-    // Use idle callback or timeout
-    if (typeof window !== 'undefined' && window.requestIdleCallback) {
-      window.requestIdleCallback(preloadAssets, { timeout: 2000 })
-    } else {
-      setTimeout(preloadAssets, 1000)
-    }
-  }, [])
-
-  // Memoize the menu button to prevent unnecessary re-renders
+  // Memoize the menu button
   const menuButton = useMemo(() => (
     <button
       ref={menuButtonRef}
       onClick={handleMenuOpen}
-      className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all active:scale-95 transform-gpu will-change-transform relative"
+      className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg active:scale-95"
       aria-label="Open menu"
       aria-expanded={menuOpen}
       aria-haspopup="true"
       disabled={isOpeningMenu.current}
       style={{ 
         WebkitTapHighlightColor: 'transparent',
-        backfaceVisibility: 'hidden'
+        transition: 'transform 0.1s ease'
       }}
     >
       <img 
@@ -263,33 +157,64 @@ export default function Navbar() {
         height={24}
         loading="eager"
         decoding="async"
-        className="transform-gpu"
         style={{ 
           pointerEvents: 'none',
           userSelect: 'none'
         }}
       />
-      {/* Loading indicator for slow opening */}
-      {isOpeningMenu.current && !menuOpen && (
-        <span className="absolute inset-0 flex items-center justify-center">
-          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-        </span>
-      )}
     </button>
   ), [handleMenuOpen, menuOpen, isOpeningMenu.current])
+
+  // Handle dropdown animation with CSS instead of Framer Motion
+  const dropdownStyle = useMemo(() => {
+    if (!featuresHover) return { display: 'none' }
+    
+    return {
+      transform: 'translateY(0)',
+      opacity: 1,
+      transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
+    }
+  }, [featuresHover])
+
+  // Simplified feature items without staggered animations
+  const featureItems = useMemo(() => (
+    features.map((feature, index) => (
+      <div
+        key={feature.title}
+        className="flex flex-col gap-1 p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150 cursor-pointer"
+        style={{
+          animationDelay: `${index * 20}ms`,
+          animationFillMode: 'both'
+        }}
+      >
+        <h6 className="text-[#20195F] text-[14px] leading-tight font-semibold">
+          {feature.title}
+        </h6>
+        <p className="font-normal text-[11px] text-[#636363] leading-tight">
+          {feature.sub}
+        </p>
+      </div>
+    ))
+  ), [])
 
   return (
     <>
       <nav 
-        className={`fixed top-5 z-20 w-full transition-transform duration-500 ease-in-out will-change-transform transform-gpu ${
+        ref={navRef}
+        className={`fixed top-5 z-20 w-full ${
           isVisible ? "translate-y-0" : "-translate-y-24"
         }`}
         style={{ 
-          contain: 'layout style paint',
-          backfaceVisibility: 'hidden'
+          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', // Smoother easing
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)'
         }}
       >
-        <GlassSurface
+        {/* TEST: Try removing GlassSurface temporarily to see if it's the culprit */}
+        <div className="bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-2xl flex justify-start mx-auto lg:w-10/11 p-3">
+        {/* <GlassSurface
           width
           height={60}
           borderRadius={24}
@@ -302,13 +227,13 @@ export default function Navbar() {
           opacity={0.3}
           padding={10}
           className="flex justify-start mx-auto drop-shadow-[#100B40]/5 drop-shadow-md lg:w-10/11" 
-        >
+        > */}
           <div className="relative z-20 w-full flex px-2 justify-between items-center">
             <Link to="/" aria-label="Zenfipay homepage">
               <img 
                 src='/icons/logo.svg' 
                 alt="zenfipay logo" 
-                loading="lazy" 
+                loading="eager" // Changed from lazy for above-fold content
                 className="w-fit" 
                 width={120}
                 height={40}
@@ -330,7 +255,7 @@ export default function Navbar() {
               <li>
                 <Link 
                   to="/frequentlyaskedquestions"
-                  className="hover:text-blue-200 transition-colors"
+                  className="hover:text-blue-200 transition-colors duration-200"
                 >
                   FAQs
                 </Link>
@@ -340,7 +265,7 @@ export default function Navbar() {
                 <a 
                   href="mailto:support@zenfipay.com" 
                   aria-label="Send an email to ZenFiPay support"
-                  className="hover:text-blue-200 transition-colors"
+                  className="hover:text-blue-200 transition-colors duration-200"
                 >
                   Contact
                 </a>
@@ -362,13 +287,13 @@ export default function Navbar() {
               {/* FOR WEB */}
               <div className="hidden lg:flex items-center gap-4 ml-4">
                 <Button
-                  className="bg-[#2B2B2B] text-white hover:bg-[#3B3B3B] transition-colors transform-gpu"
+                  className="bg-[#2B2B2B] text-white hover:bg-[#3B3B3B] transition-colors duration-200"
                   size="lg"
                 >
                   Sign in
                 </Button>
                 <Button
-                  className="bg-[#014DFF] text-white hover:bg-[#0155FF] transition-colors transform-gpu"
+                  className="bg-[#014DFF] text-white hover:bg-[#0155FF] transition-colors duration-200"
                   size="lg"
                   onClick={() => {window.open("https://zenfipay.zohobookings.com/#/4757755000000049052", "_blank")}}
                 >
@@ -377,56 +302,36 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-        </GlassSurface>
+        {/* </GlassSurface> */}
+        </div>
       </nav>
 
-      {/* DROPDOWN */}
-      <AnimatePresence>
-        {featuresHover && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            onMouseEnter={() => setFeaturesHover(true)}
-            onMouseLeave={() => setFeaturesHover(false)}
-            className="fixed top-22.5 left-1/2 -translate-x-1/2 z-30 transform-gpu will-change-transform"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <div className="bg-white flex items-center gap-4 p-4 border-[0.5px] border-[#100B40]/20 rounded-2xl min-w-75 shadow-xl backdrop-blur-0">
-              <div className="flex-shrink-0">
-                <img 
-                  src="/icons/coinDrop.svg" 
-                  alt="coin drop image" 
-                  width={60}
-                  height={60}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="flex flex-col gap-3">
-                {features.map((feature, index) => (
-                  <motion.div
-                    key={feature.title}
-                    initial={{ opacity: 0, x: -5 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.02, duration: 0.1 }}
-                    className="flex flex-col gap-1 p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150 cursor-pointer transform-gpu"
-                    style={{ willChange: 'transform, opacity' }}
-                  >
-                    <h6 className="text-[#20195F] text-[14px] leading-tight font-semibold">
-                      {feature.title}
-                    </h6>
-                    <p className="font-normal text-[11px] text-[#636363] leading-tight">
-                      {feature.sub}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
+      {/* DROPDOWN - SIMPLIFIED without Framer Motion */}
+      {featuresHover && (
+        <div
+          ref={dropdownRef}
+          onMouseEnter={() => setFeaturesHover(true)}
+          onMouseLeave={() => setFeaturesHover(false)}
+          className="fixed top-22.5 left-1/2 -translate-x-1/2 z-30"
+          style={dropdownStyle}
+        >
+          <div className="bg-white flex items-center gap-4 p-4 border-[0.5px] border-[#100B40]/20 rounded-2xl min-w-75 shadow-xl">
+            <div className="flex-shrink-0">
+              <img 
+                src="/icons/coinDrop.svg" 
+                alt="coin drop image" 
+                width={60}
+                height={60}
+                loading="eager"
+                decoding="async"
+              />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="flex flex-col gap-3">
+              {featureItems}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
