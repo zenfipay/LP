@@ -96,7 +96,7 @@ export default function Navbar() {
                                     FAQs
                                 </Link>
                             </li>
-                            <li>Blog</li>
+                            <li className="cursor-not-allowed">Blog</li>
                             <li>
                                 <a href="mailto:support@zenfipay.com" aria-label="Send an email to ZenFiPay support" className="">
                                     Contact
