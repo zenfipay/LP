@@ -38,12 +38,11 @@ export default function Navbar() {
   const menuButtonRef = useRef(null)
   const isOpeningMenu = useRef(false)
   const navRef = useRef(null)
-  const dropdownRef = useRef(null)
   const scrollTimeout = useRef(null)
+  const scrollDirection = useRef('up')
 
-  // SIMPLIFIED: Remove page readiness detection for better performance
+  // Cleanup on unmount
   useEffect(() => {
-    // Cleanup function
     return () => {
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current)
@@ -51,43 +50,44 @@ export default function Navbar() {
     }
   }, [])
 
-  // HIGHLY OPTIMIZED scroll handler - Minimal calculations
+  // ULTRA-OPTIMIZED scroll handler for iOS/Windows
   useEffect(() => {
+    let lastKnownScrollPosition = 0
+    let shouldUpdate = true
+    
     const handleScroll = () => {
-      if (!ticking.current) {
-        const currentScrollY = window.scrollY
-        const scrollingDown = currentScrollY > lastScrollY.current
+      lastKnownScrollPosition = window.scrollY
+      
+      if (shouldUpdate) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = lastKnownScrollPosition
+          const scrollingDown = currentScrollY > lastScrollY.current
+          
+          // Only update if direction changed significantly
+          if (scrollingDown !== (scrollDirection.current === 'down')) {
+            scrollDirection.current = scrollingDown ? 'down' : 'up'
+            
+            // Add hysteresis to prevent flickering
+            if (scrollingDown && currentScrollY > 150) { // Increased from 100
+              setIsVisible(false)
+            } else if (!scrollingDown && currentScrollY < 100) {
+              setIsVisible(true)
+            }
+          }
+          
+          lastScrollY.current = currentScrollY
+          shouldUpdate = true
+        })
         
-        // SIMPLE THRESHOLD CHECK - minimal calculations
-        if (scrollingDown && currentScrollY > 100) {
-          setIsVisible(false)
-        } else if (!scrollingDown) {
-          setIsVisible(true)
-        }
-        
-        lastScrollY.current = currentScrollY
-        ticking.current = false
+        shouldUpdate = false
       }
     }
 
-    // Ultra-light throttling - better than requestAnimationFrame for scroll
-    const throttledScroll = () => {
-      if (ticking.current) return
-      
-      ticking.current = true
-      handleScroll()
-      
-      // Throttle to ~30fps for scroll (smoother than 60fps for this use case)
-      setTimeout(() => {
-        ticking.current = false
-      }, 32) // ~30fps
-    }
-
     // Use passive: true for better scroll performance
-    window.addEventListener('scroll', throttledScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
 
     return () => {
-      window.removeEventListener('scroll', throttledScroll)
+      window.removeEventListener('scroll', handleScroll)
     }
   }, [])
 
@@ -96,9 +96,13 @@ export default function Navbar() {
     if (isOpeningMenu.current) return
     
     isOpeningMenu.current = true
-    setMenuOpen(true)
     
-    // Reset flag after reasonable time
+    // Use microtask for immediate state update
+    Promise.resolve().then(() => {
+      setMenuOpen(true)
+    })
+    
+    // Reset flag
     setTimeout(() => {
       isOpeningMenu.current = false
     }, 300)
@@ -108,30 +112,18 @@ export default function Navbar() {
     setMenuOpen(false)
   }, [])
 
-  // Prevent body scroll when menu is open - SIMPLIFIED
+  // Optimized body scroll lock - LESS invasive
   useEffect(() => {
     if (menuOpen) {
-      // Store current scroll position
-      const scrollY = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
+      // Minimal style changes
+      document.body.style.overflow = 'hidden'
+      // Don't touch position/top to avoid layout thrashing
     } else {
-      // Restore scroll position
-      const scrollY = document.body.style.top
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
-      }
+      document.body.style.overflow = ''
     }
     
     return () => {
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
+      document.body.style.overflow = ''
     }
   }, [menuOpen])
 
@@ -140,14 +132,13 @@ export default function Navbar() {
     <button
       ref={menuButtonRef}
       onClick={handleMenuOpen}
-      className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg active:scale-95"
+      className="text-white p-2 rounded-lg"
       aria-label="Open menu"
       aria-expanded={menuOpen}
       aria-haspopup="true"
-      disabled={isOpeningMenu.current}
       style={{ 
         WebkitTapHighlightColor: 'transparent',
-        transition: 'transform 0.1s ease'
+        outline: 'none'
       }}
     >
       <img 
@@ -158,34 +149,29 @@ export default function Navbar() {
         loading="eager"
         decoding="async"
         style={{ 
-          pointerEvents: 'none',
-          userSelect: 'none'
+          pointerEvents: 'none'
         }}
       />
     </button>
-  ), [handleMenuOpen, menuOpen, isOpeningMenu.current])
+  ), [handleMenuOpen, menuOpen])
 
-  // Handle dropdown animation with CSS instead of Framer Motion
+  // Handle dropdown with performance in mind
   const dropdownStyle = useMemo(() => {
-    if (!featuresHover) return { display: 'none' }
+    if (!featuresHover) return { display: 'none', opacity: 0 }
     
     return {
-      transform: 'translateY(0)',
       opacity: 1,
-      transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
+      transform: 'translateY(0)',
+      transition: 'opacity 0.2s ease, transform 0.2s ease'
     }
   }, [featuresHover])
 
-  // Simplified feature items without staggered animations
+  // Feature items with minimal animations
   const featureItems = useMemo(() => (
-    features.map((feature, index) => (
+    features.map((feature) => (
       <div
         key={feature.title}
-        className="flex flex-col gap-1 p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150 cursor-pointer"
-        style={{
-          animationDelay: `${index * 20}ms`,
-          animationFillMode: 'both'
-        }}
+        className="flex flex-col gap-1 p-3 hover:bg-gray-50 rounded-lg cursor-pointer"
       >
         <h6 className="text-[#20195F] text-[14px] leading-tight font-semibold">
           {feature.title}
@@ -204,36 +190,37 @@ export default function Navbar() {
         className={`fixed top-5 z-20 w-full ${
           isVisible ? "translate-y-0" : "-translate-y-24"
         }`}
+        // CRITICAL: Remove transition during scroll for iOS performance
         style={{ 
-          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', // Smoother easing
+          transition: isVisible ? 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
           willChange: 'transform',
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          transform: 'translateZ(0)'
+          transform: 'translateZ(0)', // Force GPU layer
+          contain: 'layout style paint', // Isolate for performance
+          WebkitFontSmoothing: 'antialiased'
         }}
       >
-        {/* TEST: Try removing GlassSurface temporarily to see if it's the culprit */}
-        <div className="bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-2xl flex justify-start mx-auto lg:w-10/11 p-3">
-        {/* <GlassSurface
-          width
-          height={60}
-          borderRadius={24}
-          displace={15}
-          distortionScale={-150}
-          redOffset={5}
-          greenOffset={15}
-          blueOffset={25}
-          brightness={60}
-          opacity={0.3}
-          padding={10}
-          className="flex justify-start mx-auto drop-shadow-[#100B40]/5 drop-shadow-md lg:w-10/11" 
-        > */}
+        {/* OPTION 1: Use CSS backdrop-filter (lighter than GlassSurface) */}
+        <div 
+          className="flex justify-start mx-auto lg:w-10/11 p-3"
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(12px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '24px',
+            boxShadow: '0 4px 6px -1px rgba(16, 11, 64, 0.05), 0 2px 4px -1px rgba(16, 11, 64, 0.03)',
+            // Optimize for performance
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            isolation: 'isolate'
+          }}
+        >
           <div className="relative z-20 w-full flex px-2 justify-between items-center">
             <Link to="/" aria-label="Zenfipay homepage">
               <img 
                 src='/icons/logo.svg' 
                 alt="zenfipay logo" 
-                loading="eager" // Changed from lazy for above-fold content
+                loading="eager"
                 className="w-fit" 
                 width={120}
                 height={40}
@@ -248,24 +235,24 @@ export default function Navbar() {
                 onMouseEnter={() => setFeaturesHover(true)}
                 onMouseLeave={() => setFeaturesHover(false)}
               >
-                <button className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1">
+                <button className="cursor-pointer px-2 py-1">
                   Features
                 </button>
               </li>
               <li>
                 <Link 
                   to="/frequentlyaskedquestions"
-                  className="hover:text-blue-200 transition-colors duration-200"
+                  className="hover:text-blue-200"
                 >
                   FAQs
                 </Link>
               </li>
-              <li className="cursor-not-allowed text-gray-400">Blog</li>
+              <li className="text-gray-400">Blog</li>
               <li>
                 <a 
                   href="mailto:support@zenfipay.com" 
                   aria-label="Send an email to ZenFiPay support"
-                  className="hover:text-blue-200 transition-colors duration-200"
+                  className="hover:text-blue-200"
                 >
                   Contact
                 </a>
@@ -279,7 +266,7 @@ export default function Navbar() {
                 {menuButton}
               </div>
 
-              {/* Menu Component - Lazy loaded with Suspense */}
+              {/* Menu Component */}
               <Suspense fallback={null}>
                 <Menu open={menuOpen} onClose={handleMenuClose} />
               </Suspense>
@@ -287,13 +274,13 @@ export default function Navbar() {
               {/* FOR WEB */}
               <div className="hidden lg:flex items-center gap-4 ml-4">
                 <Button
-                  className="bg-[#2B2B2B] text-white hover:bg-[#3B3B3B] transition-colors duration-200"
+                  className="bg-[#2B2B2B] text-white hover:bg-[#3B3B3B]"
                   size="lg"
                 >
                   Sign in
                 </Button>
                 <Button
-                  className="bg-[#014DFF] text-white hover:bg-[#0155FF] transition-colors duration-200"
+                  className="bg-[#014DFF] text-white hover:bg-[#0155FF]"
                   size="lg"
                   onClick={() => {window.open("https://zenfipay.zohobookings.com/#/4757755000000049052", "_blank")}}
                 >
@@ -302,27 +289,54 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-        {/* </GlassSurface> */}
         </div>
+        
+        {/* OPTION 2: If you MUST use GlassSurface, add these optimizations */}
+        {/* <GlassSurface
+          width
+          height={60}
+          borderRadius={24}
+          displace={15}
+          distortionScale={-150}
+          redOffset={5}
+          greenOffset={15}
+          blueOffset={25}
+          brightness={60}
+          opacity={0.3}
+          padding={10}
+          className="flex justify-start mx-auto lg:w-10/11"
+          style={{
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            contain: 'layout style paint'
+          }}
+        >
+          [same content as above]
+        </GlassSurface> */}
       </nav>
 
-      {/* DROPDOWN - SIMPLIFIED without Framer Motion */}
+      {/* DROPDOWN - Performance optimized */}
       {featuresHover && (
         <div
-          ref={dropdownRef}
           onMouseEnter={() => setFeaturesHover(true)}
           onMouseLeave={() => setFeaturesHover(false)}
           className="fixed top-22.5 left-1/2 -translate-x-1/2 z-30"
           style={dropdownStyle}
         >
-          <div className="bg-white flex items-center gap-4 p-4 border-[0.5px] border-[#100B40]/20 rounded-2xl min-w-75 shadow-xl">
+          <div 
+            className="bg-white flex items-center gap-4 p-4 border-[0.5px] border-[#100B40]/20 rounded-2xl min-w-75 shadow-xl"
+            style={{
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+          >
             <div className="flex-shrink-0">
               <img 
                 src="/icons/coinDrop.svg" 
                 alt="coin drop image" 
                 width={60}
                 height={60}
-                loading="eager"
+                loading="lazy"
                 decoding="async"
               />
             </div>
