@@ -69,7 +69,10 @@ const GlassSurface = ({
 
     const div = document.createElement("div");
     div.style.backdropFilter = `url(#${filterId})`;
-    return div.style.backdropFilter !== "";
+    const supported = div.style.backdropFilter !== "";
+
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
+    return supported && !isSafari;
   };
 
   const generateDisplacementMap = () => {
@@ -176,7 +179,7 @@ const GlassSurface = ({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden flex items-center justify-center ${className}`}
+      className={`relative overflow-visible flex items-center justify-center ${className}`}
       style={containerStyles}
     >
       <svg

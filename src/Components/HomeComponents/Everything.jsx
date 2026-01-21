@@ -3,6 +3,7 @@ import gsap from "gsap";
 import SplitTextHeader from "../ui/SplitTextHeader";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { Button } from "../ui/button";
+import RequestDemo from "../ui/CalendlyMorphBtn";
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -118,7 +119,7 @@ export default function Everything() {
                         className="absolute scale-150 -bottom-20 right-11"
                     />
 
-                    <Button className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[#014DFF]">Request a demo</Button>
+                    <RequestDemo className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[#014DFF]" />
 
                 </div>
 

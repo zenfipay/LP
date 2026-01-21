@@ -15,7 +15,7 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <PersonalBusiness />
-      <Partners />
+      {/* <Partners /> */}
       <Features />
       <Lifestyle />
       <Everything />

@@ -1,13 +1,13 @@
 import { useRef, useEffect } from "react";
 import SplitTextHeader from "../ui/SplitTextHeader";
 import SplitParagraph from "../ui/SplitTextParagraph";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import TypewriterText from "../ui/Typewriter";
 import { Button } from "../ui/button";
-import PaymentAnimation from "../ui/PaymentAnimation";
-import { Scroll } from "lucide-react";
+import RequestDemo from "../ui/CalendlyMorphBtn";
+
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -88,7 +88,7 @@ export default function Features() {
 
                     {/* REQUEST DEMO BUTTON CONTAINER */}
                     <div className="hidden lg:flex bg-[#ECFFD9] h-34.25 rounded-3xl justify-center items-center">
-                        <Button className="text-[#014DFF]">Request a demo</Button>
+                        <RequestDemo className="text-[#014DFF]" />
                     </div>
                 </div>
 

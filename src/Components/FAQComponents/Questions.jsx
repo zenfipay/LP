@@ -10,41 +10,42 @@ const personalQuestions = [
     },
     {
         q: "Do I need a Zenfipay account to pay",
-        a:"",
+        a:"No. You can pay directly from your existing crypto wallet without signing up or creating a ZenfiPay account.",
     },
     {
         q: "Can I pay with stablecoins in physical stores",
-        a:"",
+        a:"Yes. At checkout, you simply scan a QR code and complete payment using supported stablecoins from your wallet.",
     },
     {
         q: "Which stablecoins are supported",
-        a:"",
+        a:"ZenfiPay supports major stablecoins like USDT and USDC on selected blockchain networks.",
     },
     {
         q: "How fast are payments",
-        a:"",
+        a:"Payments are confirmed in seconds, so you can complete checkout without waiting or delays.",
     },
     {
         q: "How do I know my payment is successful",
-        a:"",
+        a:"After payment, both you and the merchant receive a clear, human-readable confirmation that shows the payment status instantly.",
     },
     {
         q: "Can I earn rewards when I pay",
-        a:"",
+        a:"Yes. You earn Zen Points whenever you transact, which can be used toward future payments and benefits.",
     },
     {
         q: "Is Zenfipay secure for users",
-        a:"",
+        a:"Yes. Payments run through secure, verified transaction flows designed to protect your funds and payment data.",
     },
 ]
 
 const businessQuestions = [
     {
         q: "What type of businesses can use Zenfipay",
-        a:"",
-    },{
+        a:"ZenfiPay is built for physical businesses such as retail stores, supermarkets, restaurants, hotels, electronics stores, and service providers.",
+    },
+    {
         q: "Do I need to change my checkout process",
-        a:"",
+        a:"No. ZenfiPay fits into your existing checkout flow and requires little to no staff retraining.",
     },
     {
         q: "How do customers pay in my store",
@@ -52,39 +53,43 @@ const businessQuestions = [
     },
     {
         q: "Can I manage multiple cashiers or branches",
-        a:"",
+        a:"Yes. You can manage staff roles, cashiers, and multiple locations from a single dashboard.",
     },
     {
         q: "How do I receive money",
-        a:"",
+        a:"Merchants receive stable, predictable settlements, with options for instant payouts or scheduled settlements.",
     },
     {
         q: "Are settlements fast",
-        a:"",
+        a:"Yes. Once a payment is confirmed, settlement happens in seconds.",
     },
     {
         q: "Can I receive payments in USD, GBP, or EUR",
-        a:"",
+        a:"Yes. ZenfiPay provides virtual foreign accounts that allow you to receive USD, GBP, and EUR.",
     },
     {
         q: "Can I convert between fiat and stablecoins",
-        a:"",
+        a:"Yes. ZenfiPay supports on-ramp and off-ramp services, as well as fiat-to-stablecoin and stablecoin-to-fiat swaps.",
     },
     {
         q: "Are exchange rates and fees transparent",
-        a:"Is Zenfipay secure for businesses",
+        a:"Yes. All exchange rates and fees are shown clearly before you complete any transaction.",
+    },
+    {
+        q: "Is Zenfipay secure for businesses",
+        a:"Yes. ZenfiPay uses secure infrastructure, verified payment flows, and clear proof of payment to protect merchants.",
     },
     {
         q: "Does Zenfipay follow regulations",
-        a:"",
+        a:"ZenfiPay operates within applicable regulatory frameworks in supported regions.",
     },
     {
         q: "Where is Zenfipay available",
-        a:"",
+        a:"ZenfiPay is launching in selected African markets, with plans to expand globally.",
     },
     {
         q: "How do businesses get started",
-        a:"",
+        a:"Businesses start with a demo-first onboarding process to understand how ZenfiPay works before going live.",
     },
 ]
 export default function Questions() {

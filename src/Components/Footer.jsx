@@ -8,25 +8,33 @@ const linkInfo = [
     {
         src: "/icons/linkedIn.svg",
         title: "LinkedIn",
-        link: ""
+        link: "https://www.linkedin.com/company/zenfipay/"
     },
     {
         src: "/icons/twitter.svg",
         title: "Twitter",
-        link: ""
+        link: "https://twitter.com/Zenfipay"
     },
     {
         src: "/icons/instagram.svg",
         title: "Instagram",
-        link: ""
+        link: "https://www.instagram.com/Zenfipay/"
     },
     {
         src: "/icons/facebook.svg",
         title: "Facebook",
-        link: ""
+        link: "https://web.facebook.com/zenfipay"
     },
 ]
 export default function Footer() {
+
+    const handleBackToTop = () => {
+        window.scrollTo({
+            top:0,
+            behaviour: "smooth",
+        })
+    }
+
     return (
         <footer className="relative bg-[#101010] lg:max-w-screen h-124.75 lg:h-screen overflow-hidden">
 
@@ -36,13 +44,13 @@ export default function Footer() {
                 <ul className="flex gap-7.5 justify-center items-center">
                     {linkInfo.map((info) => (
                         <li key={info.title} className="bg-[#2B2B2B] size-12.5 flex justify-center items-center rounded-full">
-                            <Link to="">
+                            <a href={info.link} target="_blank">
                                 <img
                                     src={info.src}
                                     alt={info.title}
                                     className=""
                                 />
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>
@@ -73,8 +81,11 @@ export default function Footer() {
                     Copyright &copy; {currentYear} Zenstack Technology Ltd.
                 </p>
 
-                <button className="bg-[#99EC64] size-6 rounded-lg p-1">
-                    <img src="/icons/tarr.svg" alt="go back up" className="" />
+                <button 
+                    onClick={handleBackToTop}
+                    className="bg-[#99EC64] size-6 rounded-lg p-1 cursor-pointer"
+                >
+                    <img src="/icons/tarr.svg" alt="go back up" />
                 </button>
             </motion.div>
 
