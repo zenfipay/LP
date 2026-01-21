@@ -242,19 +242,19 @@ export default function Navbar() {
           willChange: 'transform'
         }}
       >
-        {/* UPDATED Glass effect with blue tint */}
+        {/* UPDATED Glass effect with DARKER blue tint */}
         <div 
           className="flex justify-start mx-auto lg:w-10/11 p-3"
           style={{
-            // Blue-tinted glass effect
-            background: 'rgba(59, 130, 246, 0.15)',
+            // Darker blue-tinted glass effect
+            background: 'rgba(30, 64, 175, 0.25)', // Darker blue with more opacity
             backdropFilter: 'blur(16px) saturate(180%)',
             WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            border: '1px solid rgba(96, 165, 250, 0.25)',
+            border: '1px solid rgba(59, 130, 246, 0.35)', // Darker blue border
             borderRadius: '24px',
             boxShadow: `
-              0 4px 20px -2px rgba(37, 99, 235, 0.15),
-              0 2px 8px -1px rgba(37, 99, 235, 0.1),
+              0 4px 20px -2px rgba(30, 64, 175, 0.25),
+              0 2px 8px -1px rgba(30, 64, 175, 0.15),
               inset 0 1px 0 rgba(255, 255, 255, 0.2)
             `,
           }}
